@@ -6,22 +6,14 @@ Omacal is a configurable Omarchy clock with a mini calendar, ISO week number, mo
 
 ## Install
 
-Install Omacal disabled so you can review it before it runs:
-
 ```bash
-omarchy plugin add https://github.com/brianblakely/omacal.git --no-enable
+omarchy plugin add https://github.com/brianblakely/omacal.git
 ```
 
-Review the installed checkout:
+Accept the prompt to enable Omacal, then move it to the center section:
 
 ```bash
-omarchy plugin edit b.omacal
-```
-
-Then enable it in the center section:
-
-```bash
-omarchy plugin enable b.omacal --section center
+omarchy bar plugin move b.omacal --section center
 ```
 
 To replace the default clock, remove it:
@@ -60,7 +52,7 @@ o.bind("SUPER + CTRL + F9", "Close mini calendar", "omarchy-shell shell hide b.o
 
 Omacal does not write files or use the network. Right-clicking the widget runs `omarchy-menu-timezone`.
 
-Plugins run unsandboxed inside `omarchy-shell`; review the checkout before enabling it.
+Plugins run unsandboxed inside `omarchy-shell`; review the source before installing it.
 
 ## Update
 

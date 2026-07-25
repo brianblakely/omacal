@@ -48,18 +48,8 @@ o.bind("SUPER + ALT + F9", "Open mini calendar", "omarchy-shell shell summon b.o
 o.bind("SUPER + CTRL + F9", "Close mini calendar", "omarchy-shell shell hide b.omacal")
 ```
 
-## Behavior
-
-Omacal does not write files or use the network. Right-clicking the widget runs `omarchy-menu-timezone`.
-
-Plugins run unsandboxed inside `omarchy-shell`; review the source before installing it.
-
 ## Update
 
 ```bash
 omarchy plugin update b.omacal
 ```
-
-## License
-
-[MIT](LICENSE)

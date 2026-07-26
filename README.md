@@ -1,12 +1,10 @@
 # Omacal
 
-Omacal is a configurable Omarchy clock with a mini calendar, ISO week number, moon phase, locale-aware week start, and horizontal and vertical display formats.
+Omacal is a drop-in replacement for the default Omarchy clock that adds a mini calendar. The calendar supports keyboard controls (including vim bindings) for browsing month and year.
 
 ![Omacal screenshot](images/omacal.png)
 
 ## Install
-
-Review the source at [github.com/brianblakely/omacal](https://github.com/brianblakely/omacal), then add the plugin:
 
 ```bash
 omarchy plugin add https://github.com/brianblakely/omacal.git
@@ -18,7 +16,7 @@ Accept the prompt to enable Omacal, then move it to the center section:
 omarchy bar plugin move b.omacal --section center
 ```
 
-To replace the default clock, remove it:
+To replace the default clock, remove it (you can always add it back later, if you want):
 
 ```bash
 omarchy bar plugin remove omarchy.clock
@@ -38,7 +36,7 @@ Inside the calendar:
 
 ## Configuration
 
-Configure each Omacal setting from the command line:
+Configure each Omacal setting from the command line.
 
 Start calendar weeks on Monday:
 
@@ -54,7 +52,11 @@ Set the calendar title format:
 omarchy-shell b.omacal titleFormat "d MMMM 'W'ww yyyy"
 ```
 
-The default is `d MMMM 'W'ww yyyy`. Formats use Qt date/time tokens; `ww` displays the ISO week number.
+The default is `d MMMM 'W'ww yyyy`. Formats use [Qt date/time tokens](https://chatgpt.com/share/6a66735e-2c80-83ea-892a-a6a823337217). You can replace this with the current time if you like to keep the Omarchy bar hidden:
+
+```bash
+omarchy-shell b.omacal titleFormat "d MMMM 'W'ww yyyy"
+```
 
 Set the clock format for horizontal bars:
 
@@ -80,9 +82,7 @@ omarchy-shell b.omacal flashDuration 2000
 
 The default is `2000`; the supported range is `1000` to `60000`.
 
-## Optional shortcuts
-
-Global keybindings remain user-owned. Add any of these to your Hyprland bindings:
+## Shortcuts
 
 ```lua
 hl.unbind("SUPER + CTRL + ALT + T")

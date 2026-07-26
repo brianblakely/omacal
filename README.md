@@ -6,6 +6,8 @@ Omacal is a configurable Omarchy clock with a mini calendar, ISO week number, mo
 
 ## Install
 
+Review the source at [github.com/brianblakely/omacal](https://github.com/brianblakely/omacal), then add the plugin:
+
 ```bash
 omarchy plugin add https://github.com/brianblakely/omacal.git
 ```
@@ -34,7 +36,49 @@ Inside the calendar:
 * Press `Enter` to return to today.
 * Press `Escape` to close the calendar.
 
-The bar settings UI exposes the first day of the week, calendar title format, horizontal and vertical clock formats, and flash duration.
+## Configuration
+
+Configure each Omacal setting from the command line:
+
+Start calendar weeks on Monday:
+
+```bash
+omarchy bar plugin set b.omacal mondayFirstDayofWeek true --json
+```
+
+The default is `false`, which uses the locale's first day of the week. Replace `true` with `false` to restore it.
+
+Set the calendar title format:
+
+```bash
+omarchy bar plugin set b.omacal titleFormat "d MMMM 'W'ww yyyy"
+```
+
+The default is `d MMMM 'W'ww yyyy`. Formats use Qt date/time tokens; `ww` displays the ISO week number.
+
+Set the clock format for horizontal bars:
+
+```bash
+omarchy bar plugin set b.omacal horizontalClockFormat "dddd HH:mm"
+```
+
+The default is `dddd HH:mm`.
+
+Set the clock format for vertical bars:
+
+```bash
+omarchy bar plugin set b.omacal verticalClockFormat '"HH\n—\nmm"' --json
+```
+
+The default is three rows containing the hour, an em dash, and the minute. Use `\n` in the JSON string to create rows.
+
+Set how many seconds the `flash` command keeps the calendar open:
+
+```bash
+omarchy bar plugin set b.omacal flashDurationSeconds 2 --json
+```
+
+The default is `2`; the supported range is `1` to `60`.
 
 ## Optional shortcuts
 

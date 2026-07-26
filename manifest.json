@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "b.omacal",
   "name": "Omacal",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Brian Blakely",
   "description": "Omarchy-native day/time label with a mini calendar popup",
   "kinds": [
@@ -28,22 +28,29 @@
         "key": "mondayFirstDayofWeek",
         "type": "boolean",
         "label": "Start week on Monday",
-        "description": "Start calendar weeks on Monday instead of the locale default"
+        "description": "Start calendar weeks on Monday instead of the locale default",
+        "defaultValue": false
       },
       {
         "key": "titleFormat",
         "type": "string",
-        "label": "Calendar title format"
+        "label": "Calendar title format",
+        "description": "Qt date/time format used for the calendar heading",
+        "defaultValue": "d MMMM 'W'ww yyyy"
       },
       {
         "key": "horizontalClockFormat",
         "type": "string",
-        "label": "Horizontal clock format"
+        "label": "Horizontal clock format",
+        "description": "Qt date/time format used when the bar is horizontal",
+        "defaultValue": "dddd HH:mm"
       },
       {
         "key": "verticalClockFormat",
         "type": "string",
-        "label": "Vertical clock format (left/right bars)"
+        "label": "Vertical clock format (left/right bars)",
+        "description": "Qt date/time format used when the bar is vertical; newlines create rows",
+        "defaultValue": "HH\n—\nmm"
       },
       {
         "key": "flashDurationSeconds",

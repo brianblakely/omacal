@@ -10,9 +10,9 @@ BarWidget {
 
   property date displayDate: clock.date
 
-  readonly property string timeFormat: vertical
-    ? setting("verticalClockFormat", "HH\n\u2014\nmm")
-    : setting("horizontalClockFormat", "dddd HH:mm")
+  readonly property string hFormat: setting("hFormat", "dddd HH:mm")
+  readonly property string vFormat: setting("vFormat", "HH\n\u2014\nmm")
+  readonly property string timeFormat: vertical ? vFormat : hFormat
   readonly property string displayText: formatted(displayDate, timeFormat)
   readonly property var verticalLines: displayText.split("\n")
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false

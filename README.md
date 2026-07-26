@@ -43,7 +43,7 @@ Configure each Omacal setting from the command line:
 Start calendar weeks on Monday:
 
 ```bash
-omarchy bar plugin set b.omacal mondayFirstDayofWeek true --json
+omarchy-shell b.omacal mondayFirst true
 ```
 
 The default is `false`, which uses the locale's first day of the week. Replace `true` with `false` to restore it.
@@ -51,7 +51,7 @@ The default is `false`, which uses the locale's first day of the week. Replace `
 Set the calendar title format:
 
 ```bash
-omarchy bar plugin set b.omacal titleFormat "d MMMM 'W'ww yyyy"
+omarchy-shell b.omacal titleFormat "d MMMM 'W'ww yyyy"
 ```
 
 The default is `d MMMM 'W'ww yyyy`. Formats use Qt date/time tokens; `ww` displays the ISO week number.
@@ -59,7 +59,7 @@ The default is `d MMMM 'W'ww yyyy`. Formats use Qt date/time tokens; `ww` displa
 Set the clock format for horizontal bars:
 
 ```bash
-omarchy bar plugin set b.omacal horizontalClockFormat "dddd HH:mm"
+omarchy-shell b.omacal hFormat "dddd HH:mm"
 ```
 
 The default is `dddd HH:mm`.
@@ -67,18 +67,18 @@ The default is `dddd HH:mm`.
 Set the clock format for vertical bars:
 
 ```bash
-omarchy bar plugin set b.omacal verticalClockFormat '"HH\n—\nmm"' --json
+omarchy-shell b.omacal vFormat $'HH\n—\nmm'
 ```
 
-The default is three rows containing the hour, an em dash, and the minute. Use `\n` in the JSON string to create rows.
+The default is three rows containing the hour, an em dash, and the minute. The `$'…'` quoting passes each `\n` as a newline.
 
-Set how many seconds the `flash` command keeps the calendar open:
+Set how many milliseconds the `flash` command keeps the calendar open:
 
 ```bash
-omarchy bar plugin set b.omacal flashDurationSeconds 2 --json
+omarchy-shell b.omacal flashDuration 2000
 ```
 
-The default is `2`; the supported range is `1` to `60`.
+The default is `2000`; the supported range is `1000` to `60000`.
 
 ## Optional shortcuts
 

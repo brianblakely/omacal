@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "b.omacal",
   "name": "Omacal",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Brian Blakely",
   "description": "Omarchy-native day/time label with a mini calendar popup",
   "kinds": [
@@ -17,15 +17,15 @@
     "category": "Time",
     "allowMultiple": false,
     "defaults": {
-      "mondayFirstDayofWeek": false,
+      "mondayFirst": false,
       "titleFormat": "d MMMM 'W'ww yyyy",
-      "horizontalClockFormat": "dddd HH:mm",
-      "verticalClockFormat": "HH\n—\nmm",
-      "flashDurationSeconds": 2
+      "hFormat": "dddd HH:mm",
+      "vFormat": "HH\n—\nmm",
+      "flashDuration": 2000
     },
     "schema": [
       {
-        "key": "mondayFirstDayofWeek",
+        "key": "mondayFirst",
         "type": "boolean",
         "label": "Start week on Monday",
         "description": "Start calendar weeks on Monday instead of the locale default",
@@ -39,28 +39,28 @@
         "defaultValue": "d MMMM 'W'ww yyyy"
       },
       {
-        "key": "horizontalClockFormat",
+        "key": "hFormat",
         "type": "string",
         "label": "Horizontal clock format",
         "description": "Qt date/time format used when the bar is horizontal",
         "defaultValue": "dddd HH:mm"
       },
       {
-        "key": "verticalClockFormat",
+        "key": "vFormat",
         "type": "string",
         "label": "Vertical clock format (left/right bars)",
         "description": "Qt date/time format used when the bar is vertical; newlines create rows",
         "defaultValue": "HH\n—\nmm"
       },
       {
-        "key": "flashDurationSeconds",
+        "key": "flashDuration",
         "type": "integer",
         "label": "Flash duration",
-        "description": "How long the flash shortcut keeps the calendar panel open, in seconds",
-        "min": 1,
-        "max": 60,
-        "step": 1,
-        "defaultValue": 2
+        "description": "How long the flash shortcut keeps the calendar panel open, in milliseconds",
+        "min": 1000,
+        "max": 60000,
+        "step": 1000,
+        "defaultValue": 2000
       }
     ]
   }

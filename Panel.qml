@@ -15,12 +15,12 @@ Panel {
   property date displayDate: clock.date
   property date calendarDate: clock.date
 
-  readonly property string dateFormat: setting("titleFormat", "d MMMM 'W'ww yyyy")
-  readonly property bool mondayFirstDayOfWeek: setting("mondayFirstDayofWeek", false)
+  readonly property string titleFormat: setting("titleFormat", "d MMMM 'W'ww yyyy")
+  readonly property bool mondayFirst: normalizedMondayFirst(setting("mondayFirst", false))
   readonly property int calendarColumns: 7
   readonly property int calendarRows: 6
   readonly property var monthStart: new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1)
-  readonly property int firstWeekday: mondayFirstDayOfWeek ? 1 : localeFirstWeekday()
+  readonly property int firstWeekday: mondayFirst ? 1 : localeFirstWeekday()
   readonly property var weekdayLabels: buildWeekdayLabels()
   readonly property var calendarCells: buildCalendarCells()
   readonly property color popupForeground: Color.popups.text
@@ -28,7 +28,7 @@ Panel {
   readonly property color popupMuted: Qt.darker(popupForeground, 1.8)
   readonly property string popupFontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property string moonPhaseMarker: moonPhaseGlyph(displayDate)
-  readonly property int flashDurationSeconds: normalizedFlashDuration(setting("flashDurationSeconds", 2))
+  readonly property int flashDuration: normalizedFlashDuration(setting("flashDuration", 2000))
 
   function refresh() {
     displayDate = new Date()
@@ -57,10 +57,66 @@ Panel {
     flashTimer.restart()
   }
 
+  function saveSettings(values) {
+    if (!root.bar || !root.bar.shell
+        || typeof root.bar.shell.updateEntryInline !== "function") return false
+
+    var allowed = ["mondayFirst", "titleFormat", "hFormat", "vFormat", "flashDuration"]
+    var current = root.settings || {}
+    var next = {}
+
+    for (var key in current) {
+      if (allowed.indexOf(key) !== -1) next[key] = current[key]
+    }
+    for (var valueKey in values) {
+      if (allowed.indexOf(valueKey) !== -1) next[valueKey] = values[valueKey]
+    }
+
+    root.bar.shell.updateEntryInline(root.moduleName, next)
+    return true
+  }
+
+  function setMondayFirst(value) {
+    var requested = String(value === undefined || value === null ? "" : value)
+      .trim()
+      .toLowerCase()
+    if (requested !== "true" && requested !== "false")
+      return "error: mondayFirst must be true or false"
+    if (!saveSettings({ mondayFirst: requested === "true" }))
+      return "error: settings unavailable"
+    return requested
+  }
+
+  function setFormat(name, value) {
+    var requested = String(value === undefined || value === null ? "" : value)
+    var next = {}
+    next[name] = requested
+    if (!saveSettings(next)) return "error: settings unavailable"
+    return requested
+  }
+
+  function setFlashDuration(value) {
+    var requested = String(value === undefined || value === null ? "" : value).trim()
+    if (!/^\d+$/.test(requested))
+      return "error: flashDuration must be an integer from 1000 to 60000"
+
+    var duration = Number(requested)
+    if (!isFinite(duration) || duration < 1000 || duration > 60000)
+      return "error: flashDuration must be an integer from 1000 to 60000"
+    if (!saveSettings({ flashDuration: duration }))
+      return "error: settings unavailable"
+    return String(duration)
+  }
+
+  function normalizedMondayFirst(value) {
+    if (value === true || value === false) return value
+    return String(value).trim().toLowerCase() === "true"
+  }
+
   function normalizedFlashDuration(value) {
     var duration = Number(value)
-    if (!isFinite(duration) || duration <= 0) return 2
-    return Math.max(1, Math.min(60, Math.round(duration)))
+    if (!isFinite(duration) || duration <= 0) return 2000
+    return Math.max(1000, Math.min(60000, Math.round(duration)))
   }
 
   function resetCalendarDate() {
@@ -224,11 +280,16 @@ Panel {
     function hide(): void { root.close() }
     function toggle(): void { root.toggle() }
     function flash(): void { root.flash() }
+    function mondayFirst(value: string): string { return root.setMondayFirst(value) }
+    function titleFormat(value: string): string { return root.setFormat("titleFormat", value) }
+    function hFormat(value: string): string { return root.setFormat("hFormat", value) }
+    function vFormat(value: string): string { return root.setFormat("vFormat", value) }
+    function flashDuration(value: string): string { return root.setFlashDuration(value) }
   }
 
   Timer {
     id: flashTimer
-    interval: root.flashDurationSeconds * 1000
+    interval: root.flashDuration
     repeat: false
     onTriggered: root.close()
   }
@@ -266,7 +327,7 @@ Panel {
             id: dateHeading
             anchors.centerIn: parent
             width: Math.max(1, parent.width - (moonPhase.implicitWidth + Style.space(8)) * 2)
-            text: root.formatted(root.calendarDate, root.dateFormat)
+            text: root.formatted(root.calendarDate, root.titleFormat)
             color: root.popupForeground
             font.family: root.popupFontFamily
             font.pixelSize: Style.font.title

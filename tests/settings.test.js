@@ -9,7 +9,7 @@ const panel = fs.readFileSync(path.join(root, "Panel.qml"), "utf8")
 const readme = fs.readFileSync(path.join(root, "README.md"), "utf8")
 
 const expected = {
-  mondayFirstDayofWeek: {
+  mondayFirst: {
     type: "boolean",
     defaultValue: false
   },
@@ -17,17 +17,17 @@ const expected = {
     type: "string",
     defaultValue: "d MMMM 'W'ww yyyy"
   },
-  horizontalClockFormat: {
+  hFormat: {
     type: "string",
     defaultValue: "dddd HH:mm"
   },
-  verticalClockFormat: {
+  vFormat: {
     type: "string",
     defaultValue: "HH\n—\nmm"
   },
-  flashDurationSeconds: {
+  flashDuration: {
     type: "integer",
-    defaultValue: 2
+    defaultValue: 2000
   }
 }
 
@@ -57,10 +57,11 @@ test("keeps defaults and schema complete and in sync", () => {
     assert.notEqual(field.description.trim(), "", `${field.key} description`)
   }
 
-  const duration = schema.find(field => field.key === "flashDurationSeconds")
-  assert.equal(duration.min, 1)
-  assert.equal(duration.max, 60)
-  assert.equal(duration.step, 1)
+  const duration = schema.find(field => field.key === "flashDuration")
+  assert.equal(duration.min, 1000)
+  assert.equal(duration.max, 60000)
+  assert.equal(duration.step, 1000)
+  assert.match(duration.description, /milliseconds/)
 })
 
 test("reads every declared setting with the matching runtime fallback", () => {
@@ -73,13 +74,14 @@ test("reads every declared setting with the matching runtime fallback", () => {
     Object.keys(expected).sort()
   )
 
-  assert.match(barWidget, /setting\("horizontalClockFormat", "dddd HH:mm"\)/)
-  assert.match(barWidget, /setting\("verticalClockFormat", "HH\\n\\u2014\\nmm"\)/)
-  assert.match(panel, /setting\("mondayFirstDayofWeek", false\)/)
+  assert.match(barWidget, /setting\("hFormat", "dddd HH:mm"\)/)
+  assert.match(barWidget, /setting\("vFormat", "HH\\n\\u2014\\nmm"\)/)
+  assert.match(panel, /setting\("mondayFirst", false\)/)
   assert.match(panel, /setting\("titleFormat", "d MMMM 'W'ww yyyy"\)/)
-  assert.match(panel, /setting\("flashDurationSeconds", 2\)/)
-  assert.match(panel, /Math\.max\(1, Math\.min\(60, Math\.round\(duration\)\)\)/)
-  assert.match(panel, /interval: root\.flashDurationSeconds \* 1000/)
+  assert.match(panel, /setting\("flashDuration", 2000\)/)
+  assert.match(panel, /Math\.max\(1000, Math\.min\(60000, Math\.round\(duration\)\)\)/)
+  assert.match(panel, /interval: root\.flashDuration\b/)
+  assert.doesNotMatch(panel, /flashDuration\s*\*\s*1000/)
 })
 
 test("reinjects changed bar settings into the calendar panel", () => {
@@ -87,10 +89,42 @@ test("reinjects changed bar settings into the calendar panel", () => {
   assert.match(barWidget, /target\.settings = root\.settings/)
 })
 
-test("documents a copy-pastable command for every setting", () => {
+test("persists validated settings through the Omacal IPC target", () => {
+  assert.equal((panel.match(/\bIpcHandler\s*\{/g) || []).length, 1)
+  assert.match(
+    panel,
+    /root\.bar\.shell\.updateEntryInline\(root\.moduleName, next\)/
+  )
+  assert.match(
+    panel,
+    /var allowed = \["mondayFirst", "titleFormat", "hFormat", "vFormat", "flashDuration"\]/
+  )
+  assert.match(
+    panel,
+    /requested !== "true" && requested !== "false"/
+  )
+  assert.match(
+    panel,
+    /saveSettings\(\{ mondayFirst: requested === "true" \}\)/
+  )
+  assert.match(
+    panel,
+    /duration < 1000 \|\| duration > 60000/
+  )
+  assert.match(panel, /saveSettings\(\{ flashDuration: duration \}\)/)
+
+  for (const key of Object.keys(expected)) {
+    assert.match(
+      panel,
+      new RegExp(`function ${key}\\(value: string\\): string`)
+    )
+  }
+})
+
+test("documents a copy-pastable omarchy-shell command for every setting", () => {
   for (const key of Object.keys(expected)) {
     assert.equal(
-      readme.includes(`omarchy bar plugin set b.omacal ${key} `),
+      readme.includes(`omarchy-shell b.omacal ${key} `),
       true,
       `${key} command`
     )
@@ -98,26 +132,47 @@ test("documents a copy-pastable command for every setting", () => {
 
   assert.match(
     readme,
-    /omarchy bar plugin set b\.omacal mondayFirstDayofWeek true --json/
+    /omarchy-shell b\.omacal mondayFirst true/
   )
   assert.match(
     readme,
-    /omarchy bar plugin set b\.omacal verticalClockFormat '"HH\\n—\\nmm"' --json/
+    /omarchy-shell b\.omacal titleFormat "d MMMM 'W'ww yyyy"/
   )
   assert.match(
     readme,
-    /omarchy bar plugin set b\.omacal flashDurationSeconds 2 --json/
+    /omarchy-shell b\.omacal hFormat "dddd HH:mm"/
   )
+  assert.match(
+    readme,
+    /omarchy-shell b\.omacal vFormat \$'HH\\n—\\nmm'/
+  )
+  assert.match(
+    readme,
+    /omarchy-shell b\.omacal flashDuration 2000/
+  )
+  assert.doesNotMatch(readme, /omarchy bar plugin set b\.omacal/)
   assert.match(readme, /The default is `false`/)
   assert.match(readme, /The default is `d MMMM 'W'ww yyyy`/)
   assert.match(readme, /The default is `dddd HH:mm`/)
   assert.match(readme, /The default is three rows/)
-  assert.match(readme, /The default is `2`/)
-  assert.match(readme, /supported range is `1` to `60`/)
+  assert.match(readme, /The default is `2000`/)
+  assert.match(readme, /supported range is `1000` to `60000`/)
 })
 
-test("publishes the settings documentation as version 0.0.6", () => {
-  assert.equal(manifest.version, "0.0.6")
+test("removes the superseded setting names", () => {
+  const publishedSource = `${JSON.stringify(manifest)}\n${barWidget}\n${panel}\n${readme}`
+  for (const oldName of [
+    "mondayFirstDayofWeek",
+    "horizontalClockFormat",
+    "verticalClockFormat",
+    "flashDurationSeconds"
+  ]) {
+    assert.equal(publishedSource.includes(oldName), false, oldName)
+  }
+})
+
+test("publishes the omarchy-shell settings API as version 0.0.7", () => {
+  assert.equal(manifest.version, "0.0.7")
   assert.match(
     readme,
     /Review the source at \[github\.com\/brianblakely\/omacal\]/
